@@ -4,7 +4,6 @@ package edu.iis.mto.serverloadbalancer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import org.hamcrest.Matcher;
 import org.junit.Test;
 
 public class ServerLoadBalancerTest {
@@ -31,12 +30,23 @@ public class ServerLoadBalancerTest {
     }
 
     @Test
-    public void balancingOneServerWithTenSlotsCapacity_andOneSlotVm_fillsTheServerWithTenPercent(){
+    public void balancingOneServerWithTenSlotsCapacity_andOneSlotVm_fillsTheServerWithTenPercent() {
         Server theServer = a(ServerBuilder.server().withCapacity(10));
         Vm theVm = a(VmBuilder.vm().ofSize(1));
         balancing(aServersListWith(theServer), aVmsListWith(theVm));
         assertThat(theServer, CurrentLoadPercentageMatcher.hasCurrentLoadOf(10.0d));
         assertThat("server should contain the vm", theServer.contains(theVm));
+    }
+
+    @Test
+    public void balancingTehServerWithEnoughRoom_fillsTheServerWithAllVms() {
+        Server theServer = a(ServerBuilder.server().withCapacity(10));
+        Vm theFirstVm = a(VmBuilder.vm().ofSize(1));
+        Vm theSecondVm = a(VmBuilder.vm().ofSize(1));
+        balancing(aServersListWith(theServer), aVmsListWith(theFirstVm, theSecondVm));
+        assertThat(theServer, ServerVmsCountMatcher.hasAVmsCountOf(2));
+        assertThat("server should contain the first vm", theServer.contains(theFirstVm));
+        assertThat("server should contain the second vm", theServer.contains(theSecondVm));
     }
 
     private Vm[] aVmsListWith(Vm... vms) {
@@ -55,7 +65,7 @@ public class ServerLoadBalancerTest {
         return servers;
     }
 
-    private <T> T a(Builder<T> builder){
+    private <T> T a(Builder<T> builder) {
         return builder.build();
     }
 
