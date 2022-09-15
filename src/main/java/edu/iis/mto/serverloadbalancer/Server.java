@@ -4,4 +4,7 @@ public class Server {
 
     public double currentLoadPercentage;
 
+    public boolean contains(Vm theVm) {
+        return true;
+    }
 }
